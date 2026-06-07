@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RSS Reader</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <div>
+          <p class="eyebrow">MDN RSS</p>
+          <h1>記事一覧</h1>
+        </div>
+        <div class="actions">
+          <button id="fetch-rss-button" class="action-button secondary" type="button">
+            RSSを取得
+          </button>
+        </div>
+      </header>
+
+      <nav class="source-filter" aria-label="RSS source filter">
+        <button class="source-filter-button active" type="button" data-source="">
+          すべて
+        </button>
+      </nav>
+
+      <nav class="topic-filter" aria-label="Topic filter">
+        <button class="topic-filter-button active" type="button" data-topic="">
+          すべて
+        </button>
+        <button class="topic-filter-button" type="button" data-topic="AI">
+          AI
+        </button>
+        <button class="topic-filter-button" type="button" data-topic="Web制作">
+          Web制作
+        </button>
+        <button class="topic-filter-button" type="button" data-topic="JavaScript">
+          JavaScript
+        </button>
+      </nav>
+
+      <section class="feeds-panel" aria-labelledby="feeds-title">
+        <div class="section-heading">
+          <h2 id="feeds-title">登録済みフィード</h2>
+        </div>
+        <form id="feed-form" class="feed-form">
+          <label>
+            <span>名前</span>
+            <input id="feed-name" name="name" type="text" placeholder="Publickey" required />
+          </label>
+          <label>
+            <span>URL</span>
+            <input
+              id="feed-url"
+              name="url"
+              type="url"
+              placeholder="https://www.publickey1.jp/atom.xml"
+              required
+            />
+          </label>
+          <button id="add-feed-button" class="action-button" type="submit">
+            フィード追加
+          </button>
+        </form>
+        <ul id="feeds-list" class="feeds-list" aria-live="polite"></ul>
+      </section>
+
+      <section id="status" class="status">読み込み中...</section>
+      <section id="articles" class="articles" aria-live="polite"></section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
