@@ -12,8 +12,6 @@ services:
         fromDatabase:
           name: rss-summary-reader-db
           property: connectionString
-      - key: OPENAI_API_KEY
-        sync: false
 
 databases:
   - name: rss-summary-reader-db
