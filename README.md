@@ -74,6 +74,7 @@ curl 'http://localhost:3000/articles?topic=AI&limit=20'
 ## Render Deployment
 
 This project now uses Render Postgres. Persistent Disk is not required.
+The included `render.yaml` uses Render's Free instance types for both the web service and Postgres. Free Render Postgres is suitable for testing and hobby use, but has Render's current free-tier limitations, including a 30-day database limit.
 
 ### Option A: Blueprint
 
@@ -91,7 +92,8 @@ Blueprint settings:
 Runtime: Node
 Build Command: npm install
 Start Command: npm run start
-Database: Render Postgres
+Web Service Plan: Free
+Database: Render Postgres Free
 Environment:
   NODE_ENV=production
   DATABASE_URL=(from Render Postgres)

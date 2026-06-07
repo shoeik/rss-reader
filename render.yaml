@@ -2,7 +2,7 @@ services:
   - type: web
     name: rss-summary-reader
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm install
     startCommand: npm run start
     envVars:
@@ -17,4 +17,4 @@ services:
 
 databases:
   - name: rss-summary-reader-db
-    plan: basic-256mb
+    plan: free
