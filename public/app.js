@@ -117,7 +117,35 @@ function renderFeeds() {
 
 function renderArticle(article) {
   const card = document.createElement("article");
-  card.className = "article-card";
+  card.className = "article-card article-card-clickable";
+  card.tabIndex = 0;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", `${article.title || "無題"}の詳細を開く`);
+
+  const openArticleDetail = () => {
+    window.location.href = `/article.html?id=${encodeURIComponent(article.id)}`;
+  };
+
+  card.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest("a, button")) {
+      return;
+    }
+
+    openArticleDetail();
+  });
+
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    if (event.target instanceof Element && event.target.closest("a, button")) {
+      return;
+    }
+
+    event.preventDefault();
+    openArticleDetail();
+  });
 
   card.appendChild(createTextElement("h2", "article-title", article.title || "無題"));
 

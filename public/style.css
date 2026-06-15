@@ -226,6 +226,25 @@ h1 {
   padding: 20px;
 }
 
+.article-card-clickable {
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.article-card-clickable:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 10px 24px rgb(15 23 42 / 8%);
+  transform: translateY(-1px);
+}
+
+.article-card-clickable:focus-visible {
+  border-color: #2563eb;
+  outline: 3px solid #bfdbfe;
+}
+
 .article-title {
   margin: 0 0 10px;
   font-size: 20px;
@@ -271,6 +290,77 @@ h1 {
   background: #111827;
 }
 
+.article-detail-page {
+  width: min(820px, calc(100% - 32px));
+}
+
+.article-detail-header {
+  align-items: center;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.article-detail {
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 28px;
+}
+
+.article-detail-title {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.35;
+}
+
+.article-detail-section {
+  margin-top: 24px;
+}
+
+.detail-section-title {
+  margin: 0 0 8px;
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.article-summary {
+  margin: 0;
+  border-left: 4px solid #2563eb;
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: 14px 16px;
+  white-space: pre-line;
+}
+
+.article-detail-snippet {
+  color: #334155;
+  font-size: 16px;
+}
+
+.article-detail-read-link {
+  margin-top: 24px;
+}
+
 @media (max-width: 640px) {
   .page {
     width: min(100% - 24px, 960px);
@@ -292,6 +382,14 @@ h1 {
 
   .action-button {
     flex: 1 1 160px;
+  }
+
+  .article-detail {
+    padding: 20px;
+  }
+
+  .article-detail-title {
+    font-size: 24px;
   }
 
   h1 {

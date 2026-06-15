@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>記事詳細 - RSS Reader</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="page article-detail-page">
+      <header class="header article-detail-header">
+        <div>
+          <p class="eyebrow">RSS Reader</p>
+          <h1>記事詳細</h1>
+        </div>
+        <a class="back-link" href="/">記事一覧へ戻る</a>
+      </header>
+
+      <section id="status" class="status">読み込み中...</section>
+      <article id="article-detail" class="article-detail" aria-live="polite"></article>
+
+      <!--
+      TODO:
+      - 記事メモ機能
+      - 本文取得機能
+      - AI要約表示改善
+      - Brain Canvas連携
+      -->
+    </main>
+
+    <script src="/article.js"></script>
+  </body>
+</html>

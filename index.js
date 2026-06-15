@@ -465,6 +465,59 @@ app.get("/articles", async (req, res) => {
   }
 });
 
+app.get("/articles/:id", async (req, res) => {
+  try {
+    const articleId = Number.parseInt(req.params.id, 10);
+
+    if (Number.isNaN(articleId)) {
+      res.status(400).json({
+        error: "記事取得失敗",
+        message: "記事IDが不正です"
+      });
+      return;
+    }
+
+    const article = await dbGet(
+      `
+        SELECT
+          id,
+          title,
+          link,
+          pub_date AS "pubDate",
+          content_snippet AS "contentSnippet",
+          source,
+          summary
+        FROM articles
+        WHERE id = $1
+      `,
+      [articleId]
+    );
+
+    if (!article) {
+      res.status(404).json({
+        error: "記事取得失敗",
+        message: "記事が見つかりません"
+      });
+      return;
+    }
+
+    res.json({
+      id: article.id,
+      title: article.title,
+      source: article.source,
+      pubDate: article.pubDate,
+      contentSnippet: article.contentSnippet,
+      summary: article.summary || null,
+      link: article.link
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "記事取得失敗",
+      message: error.message
+    });
+  }
+});
+
 app.post("/fetch-rss", async (req, res) => {
   try {
     const failedFeeds = [];
