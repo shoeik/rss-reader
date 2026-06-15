@@ -253,6 +253,15 @@ h1 {
   outline: 3px solid #bfdbfe;
 }
 
+.article-card-read {
+  background: #f8fafc;
+}
+
+.article-card-read .article-title,
+.article-card-read .content-snippet {
+  color: #64748b;
+}
+
 .article-title {
   margin: 0 0 10px;
   font-size: 20px;

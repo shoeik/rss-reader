@@ -160,6 +160,18 @@ function renderArticleControls(article) {
     return controls;
   }
 
+  const readButton = document.createElement("button");
+  readButton.className = "article-control-button";
+  readButton.type = "button";
+  readButton.textContent = article.isRead ? "未読に戻す" : "既読にする";
+  readButton.addEventListener("click", () => {
+    const action = article.isRead ? "unread" : "read";
+    const message = article.isRead ? "未読に戻しました" : "既読にしました";
+
+    updateArticleState(article, action, message);
+  });
+  controls.appendChild(readButton);
+
   const readLaterButton = document.createElement("button");
   readLaterButton.className = "article-control-button";
   readLaterButton.type = "button";
@@ -189,6 +201,11 @@ function renderArticleControls(article) {
 function renderArticle(article) {
   const card = document.createElement("article");
   card.className = "article-card article-card-clickable";
+
+  if (article.isRead && !article.dismissed) {
+    card.classList.add("article-card-read");
+  }
+
   card.tabIndex = 0;
   card.setAttribute("role", "link");
   card.setAttribute("aria-label", `${article.title || "無題"}の詳細を開く`);
@@ -409,7 +426,9 @@ function setSelectedTopic(topic) {
 }
 
 function setSelectedView(view) {
-  selectedView = ["all", "readlater", "dismissed"].includes(view) ? view : "all";
+  selectedView = ["all", "readlater", "dismissed", "unread", "read"].includes(view)
+    ? view
+    : "all";
 
   updateViewFilterState();
   loadArticles();

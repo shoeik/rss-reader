@@ -60,6 +60,7 @@ async function initializeDatabase() {
       summary TEXT,
       read_later BOOLEAN NOT NULL DEFAULT FALSE,
       dismissed BOOLEAN NOT NULL DEFAULT FALSE,
+      is_read BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -72,6 +73,11 @@ async function initializeDatabase() {
   await pool.query(`
     ALTER TABLE articles
     ADD COLUMN IF NOT EXISTS dismissed BOOLEAN NOT NULL DEFAULT FALSE
+  `);
+
+  await pool.query(`
+    ALTER TABLE articles
+    ADD COLUMN IF NOT EXISTS is_read BOOLEAN NOT NULL DEFAULT FALSE
   `);
 }
 
@@ -430,6 +436,12 @@ app.get("/articles", async (req, res) => {
       conditions.push("dismissed = FALSE");
     } else if (selectedView === "dismissed") {
       conditions.push("dismissed = TRUE");
+    } else if (selectedView === "unread") {
+      conditions.push("dismissed = FALSE");
+      conditions.push("is_read = FALSE");
+    } else if (selectedView === "read") {
+      conditions.push("dismissed = FALSE");
+      conditions.push("is_read = TRUE");
     } else {
       conditions.push("dismissed = FALSE");
     }
@@ -453,6 +465,7 @@ app.get("/articles", async (req, res) => {
           summary,
           read_later AS "readLater",
           dismissed,
+          is_read AS "isRead",
           created_at AS "createdAt"
         FROM articles
         ${whereClause}
@@ -480,6 +493,7 @@ app.get("/articles", async (req, res) => {
           source: article.source,
           readLater: article.readLater,
           dismissed: article.dismissed,
+          isRead: article.isRead,
           summary: summary || null,
           summaryStatus: summary ? "done" : "pending"
         };
@@ -517,7 +531,8 @@ app.get("/articles/:id", async (req, res) => {
           source,
           summary,
           read_later AS "readLater",
-          dismissed
+          dismissed,
+          is_read AS "isRead"
         FROM articles
         WHERE id = $1
       `,
@@ -541,6 +556,7 @@ app.get("/articles/:id", async (req, res) => {
       summary: article.summary || null,
       readLater: article.readLater,
       dismissed: article.dismissed,
+      isRead: article.isRead,
       link: article.link
     });
   } catch (error) {
@@ -581,7 +597,8 @@ async function updateArticleState(req, res, changes) {
         RETURNING
           id,
           read_later AS "readLater",
-          dismissed
+          dismissed,
+          is_read AS "isRead"
       `,
       params
     );
@@ -617,6 +634,14 @@ app.post("/articles/:id/dismiss", (req, res) => {
 
 app.post("/articles/:id/undismiss", (req, res) => {
   updateArticleState(req, res, { dismissed: false });
+});
+
+app.post("/articles/:id/read", (req, res) => {
+  updateArticleState(req, res, { is_read: true });
+});
+
+app.post("/articles/:id/unread", (req, res) => {
+  updateArticleState(req, res, { is_read: false });
 });
 
 app.post("/fetch-rss", async (req, res) => {
