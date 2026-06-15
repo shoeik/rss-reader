@@ -44,7 +44,8 @@ h1 {
 }
 
 .source-filter,
-.topic-filter {
+.topic-filter,
+.view-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -57,12 +58,17 @@ h1 {
 .topic-filter {
   border-top: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding: 12px 0;
 }
 
+.view-filter {
+  margin-bottom: 20px;
+}
+
 .source-filter-button,
-.topic-filter-button {
+.topic-filter-button,
+.view-filter-button {
   min-height: 34px;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
@@ -76,14 +82,16 @@ h1 {
 }
 
 .source-filter-button.active,
-.topic-filter-button.active {
+.topic-filter-button.active,
+.view-filter-button.active {
   border-color: #2563eb;
   background: #eff6ff;
   color: #1d4ed8;
 }
 
 .source-filter-button:hover,
-.topic-filter-button:hover {
+.topic-filter-button:hover,
+.view-filter-button:hover {
   border-color: #2563eb;
 }
 
@@ -288,6 +296,36 @@ h1 {
 
 .read-link:hover {
   background: #111827;
+}
+
+.article-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.article-control-button {
+  min-height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.article-control-button:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.article-control-button.danger:hover {
+  border-color: #dc2626;
+  color: #b91c1c;
 }
 
 .article-detail-page {

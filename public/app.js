@@ -3,6 +3,7 @@ const statusElement = document.querySelector("#status");
 const fetchRssButton = document.querySelector("#fetch-rss-button");
 const sourceFilter = document.querySelector(".source-filter");
 const topicFilter = document.querySelector(".topic-filter");
+const viewFilter = document.querySelector(".view-filter");
 const feedForm = document.querySelector("#feed-form");
 const feedNameInput = document.querySelector("#feed-name");
 const feedUrlInput = document.querySelector("#feed-url");
@@ -12,6 +13,7 @@ const fetchRssButtonDefaultText = fetchRssButton.textContent;
 const addFeedButtonDefaultText = addFeedButton.textContent;
 let selectedSource = "";
 let selectedTopic = "";
+let selectedView = "all";
 let feeds = [];
 
 function setStatus(message, type = "") {
@@ -90,6 +92,15 @@ function updateTopicFilterState() {
   }
 }
 
+function updateViewFilterState() {
+  const viewFilterButtons = viewFilter.querySelectorAll(".view-filter-button");
+
+  for (const button of viewFilterButtons) {
+    const isActive = button.dataset.view === selectedView;
+    button.classList.toggle("active", isActive);
+  }
+}
+
 function renderFeeds() {
   feedsList.textContent = "";
 
@@ -113,6 +124,66 @@ function renderFeeds() {
     item.appendChild(feedInfo);
     feedsList.appendChild(item);
   }
+}
+
+async function updateArticleState(article, action, successMessage) {
+  try {
+    const response = await fetch(`/articles/${encodeURIComponent(article.id)}/${action}`, {
+      method: "POST"
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "記事更新に失敗しました");
+    }
+
+    setStatus(successMessage, "success");
+    await loadArticles({ preserveStatus: true });
+  } catch (error) {
+    setStatus(error.message, "error");
+  }
+}
+
+function renderArticleControls(article) {
+  const controls = document.createElement("div");
+  controls.className = "article-controls";
+
+  if (article.dismissed) {
+    const restoreButton = document.createElement("button");
+    restoreButton.className = "article-control-button";
+    restoreButton.type = "button";
+    restoreButton.textContent = "復元";
+    restoreButton.addEventListener("click", () => {
+      updateArticleState(article, "undismiss", "記事を復元しました");
+    });
+    controls.appendChild(restoreButton);
+    return controls;
+  }
+
+  const readLaterButton = document.createElement("button");
+  readLaterButton.className = "article-control-button";
+  readLaterButton.type = "button";
+  readLaterButton.textContent = article.readLater ? "あとで読む解除" : "あとで読む";
+  readLaterButton.addEventListener("click", () => {
+    const action = article.readLater ? "unreadlater" : "readlater";
+    const message = article.readLater
+      ? "あとで読むを解除しました"
+      : "あとで読むに追加しました";
+
+    updateArticleState(article, action, message);
+  });
+  controls.appendChild(readLaterButton);
+
+  const dismissButton = document.createElement("button");
+  dismissButton.className = "article-control-button danger";
+  dismissButton.type = "button";
+  dismissButton.textContent = "捨てる";
+  dismissButton.addEventListener("click", () => {
+    updateArticleState(article, "dismiss", "記事を捨てました");
+  });
+  controls.appendChild(dismissButton);
+
+  return controls;
 }
 
 function renderArticle(article) {
@@ -181,6 +252,8 @@ function renderArticle(article) {
     card.appendChild(link);
   }
 
+  card.appendChild(renderArticleControls(article));
+
   return card;
 }
 
@@ -188,7 +261,10 @@ async function loadArticles(options = {}) {
   const preserveStatus = options.preserveStatus === true;
 
   try {
-    const params = new URLSearchParams({ limit: "100" });
+    const params = new URLSearchParams({
+      limit: "100",
+      view: selectedView
+    });
 
     if (selectedTopic) {
       params.set("topic", selectedTopic);
@@ -332,6 +408,13 @@ function setSelectedTopic(topic) {
   loadArticles();
 }
 
+function setSelectedView(view) {
+  selectedView = ["all", "readlater", "dismissed"].includes(view) ? view : "all";
+
+  updateViewFilterState();
+  loadArticles();
+}
+
 feedForm.addEventListener("submit", addFeed);
 fetchRssButton.addEventListener("click", fetchRssArticles);
 topicFilter.addEventListener("click", (event) => {
@@ -343,9 +426,19 @@ topicFilter.addEventListener("click", (event) => {
 
   setSelectedTopic(button.dataset.topic || "");
 });
+viewFilter.addEventListener("click", (event) => {
+  const button = event.target.closest(".view-filter-button");
+
+  if (!button) {
+    return;
+  }
+
+  setSelectedView(button.dataset.view || "all");
+});
 
 async function init() {
   await loadFeeds();
+  updateViewFilterState();
   await loadArticles();
 }
 

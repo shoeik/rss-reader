@@ -58,8 +58,20 @@ async function initializeDatabase() {
       content_snippet TEXT,
       source TEXT,
       summary TEXT,
+      read_later BOOLEAN NOT NULL DEFAULT FALSE,
+      dismissed BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     )
+  `);
+
+  await pool.query(`
+    ALTER TABLE articles
+    ADD COLUMN IF NOT EXISTS read_later BOOLEAN NOT NULL DEFAULT FALSE
+  `);
+
+  await pool.query(`
+    ALTER TABLE articles
+    ADD COLUMN IF NOT EXISTS dismissed BOOLEAN NOT NULL DEFAULT FALSE
   `);
 }
 
@@ -407,14 +419,27 @@ app.get("/articles", async (req, res) => {
       typeof req.query.source === "string" ? req.query.source.trim() : "";
     const selectedTopic =
       typeof req.query.topic === "string" ? req.query.topic.trim() : "";
+    const selectedView =
+      typeof req.query.view === "string" ? req.query.view.trim() : "all";
     const topicKeywords = TOPIC_KEYWORDS[selectedTopic] || null;
     const queryParams = [];
-    let whereClause = "";
+    const conditions = [];
+
+    if (selectedView === "readlater") {
+      conditions.push("read_later = TRUE");
+      conditions.push("dismissed = FALSE");
+    } else if (selectedView === "dismissed") {
+      conditions.push("dismissed = TRUE");
+    } else {
+      conditions.push("dismissed = FALSE");
+    }
 
     if (!topicKeywords && selectedSource) {
-      whereClause = "WHERE source = $1";
       queryParams.push(selectedSource);
+      conditions.push(`source = $${queryParams.length}`);
     }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const articles = await dbAll(
       `
@@ -426,6 +451,8 @@ app.get("/articles", async (req, res) => {
           content_snippet AS "contentSnippet",
           source,
           summary,
+          read_later AS "readLater",
+          dismissed,
           created_at AS "createdAt"
         FROM articles
         ${whereClause}
@@ -451,6 +478,8 @@ app.get("/articles", async (req, res) => {
           pubDate: article.pubDate,
           contentSnippet: article.contentSnippet,
           source: article.source,
+          readLater: article.readLater,
+          dismissed: article.dismissed,
           summary: summary || null,
           summaryStatus: summary ? "done" : "pending"
         };
@@ -486,7 +515,9 @@ app.get("/articles/:id", async (req, res) => {
           pub_date AS "pubDate",
           content_snippet AS "contentSnippet",
           source,
-          summary
+          summary,
+          read_later AS "readLater",
+          dismissed
         FROM articles
         WHERE id = $1
       `,
@@ -508,6 +539,8 @@ app.get("/articles/:id", async (req, res) => {
       pubDate: article.pubDate,
       contentSnippet: article.contentSnippet,
       summary: article.summary || null,
+      readLater: article.readLater,
+      dismissed: article.dismissed,
       link: article.link
     });
   } catch (error) {
@@ -516,6 +549,74 @@ app.get("/articles/:id", async (req, res) => {
       message: error.message
     });
   }
+});
+
+async function updateArticleState(req, res, changes) {
+  try {
+    const articleId = Number.parseInt(req.params.id, 10);
+
+    if (Number.isNaN(articleId)) {
+      res.status(400).json({
+        error: "記事更新失敗",
+        message: "記事IDが不正です"
+      });
+      return;
+    }
+
+    const assignments = [];
+    const params = [];
+
+    for (const [column, value] of Object.entries(changes)) {
+      params.push(value);
+      assignments.push(`${column} = $${params.length}`);
+    }
+
+    params.push(articleId);
+
+    const article = await dbGet(
+      `
+        UPDATE articles
+        SET ${assignments.join(", ")}
+        WHERE id = $${params.length}
+        RETURNING
+          id,
+          read_later AS "readLater",
+          dismissed
+      `,
+      params
+    );
+
+    if (!article) {
+      res.status(404).json({
+        error: "記事更新失敗",
+        message: "記事が見つかりません"
+      });
+      return;
+    }
+
+    res.json(article);
+  } catch (error) {
+    res.status(500).json({
+      error: "記事更新失敗",
+      message: error.message
+    });
+  }
+}
+
+app.post("/articles/:id/readlater", (req, res) => {
+  updateArticleState(req, res, { read_later: true });
+});
+
+app.post("/articles/:id/unreadlater", (req, res) => {
+  updateArticleState(req, res, { read_later: false });
+});
+
+app.post("/articles/:id/dismiss", (req, res) => {
+  updateArticleState(req, res, { dismissed: true });
+});
+
+app.post("/articles/:id/undismiss", (req, res) => {
+  updateArticleState(req, res, { dismissed: false });
 });
 
 app.post("/fetch-rss", async (req, res) => {
