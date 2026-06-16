@@ -426,7 +426,14 @@ function setSelectedTopic(topic) {
 }
 
 function setSelectedView(view) {
-  selectedView = ["all", "readlater", "dismissed", "unread", "read"].includes(view)
+  selectedView = [
+    "all",
+    "readlater",
+    "not-readlater",
+    "dismissed",
+    "unread",
+    "read"
+  ].includes(view)
     ? view
     : "all";
 

@@ -434,6 +434,9 @@ app.get("/articles", async (req, res) => {
     if (selectedView === "readlater") {
       conditions.push("read_later = TRUE");
       conditions.push("dismissed = FALSE");
+    } else if (selectedView === "not-readlater") {
+      conditions.push("read_later = FALSE");
+      conditions.push("dismissed = FALSE");
     } else if (selectedView === "dismissed") {
       conditions.push("dismissed = TRUE");
     } else if (selectedView === "unread") {
